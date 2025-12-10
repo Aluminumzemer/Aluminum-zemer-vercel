@@ -27,6 +27,7 @@
       position: sticky;
       top: 0;
       z-index: 20;
+      flex-wrap: wrap;
     }
     .brand {
       display: flex;
@@ -112,6 +113,7 @@
       justify-content: space-between;
       gap: 1rem;
       margin-bottom: 1rem;
+      flex-wrap: wrap;
     }
     .section-header h2 {
       font-size: 1.1rem;
@@ -229,7 +231,7 @@
       display: flex;
       flex-direction: column;
     }
-    .cart-panel. {
+    .cart-panel.open {
       transform: translateX(0);
     }
     .cart-header {
@@ -431,7 +433,7 @@
       <a href="#checkout" id="navCheckout">סיכום הזמנה</a>
       <a href="#contact" id="navContact">צור קשר</a>
       <a href="catalog.pdf" target="_blank" id="navCatalog" class="catalog-link">
-        📘 קATALOG PDF
+        📘 קטלוג PDF
       </a>
     </nav>
     <div class="header-right">
@@ -453,12 +455,12 @@
         <div>
           <h2 id="productsTitle">מוצרים</h2>
           <small id="productsSubtitle">
-            חיפוש לפי שם, מספר קליל או קטגוריה. ניתן להוסיף צבע וכמות לכל פרופיל.
+            חיפוש לפי שם، מספר קליל או קטגוריה. ניתן להוסיף צבע וכמות لكل פרופיל.
           </small>
         </div>
         <div>
           <a href="catalog.pdf" target="_blank" class="catalog-link" id="catalogButton">
-            📘 קatalog PDF
+            📘 קטלוג PDF
           </a>
         </div>
       </div>
@@ -467,7 +469,7 @@
         <input
           id="searchInput"
           type="text"
-          placeholder="חיפוש לפי שם, מספר קליל או קטגוריה..."
+          placeholder="חיפוש לפי שם، מספר קליל או קטגוריה..."
         />
         <select id="categoryFilter">
           <option value="all">كل الفئات / כל הקטגוריות</option>
@@ -483,7 +485,7 @@
         <div>
           <h2 id="checkoutTitle">פרטי הזמנה ולקוח</h2>
           <small id="checkoutSubtitle">
-            מלא את הפרטים, בדוק את סיכום ההזמנה ולחץ שלח.
+            מלא את הפרטים، בדוק את סיכום ההזמנה ולחץ שלח.
           </small>
         </div>
         <span class="pill">
@@ -503,7 +505,7 @@
             <input id="customerPhone" type="tel" />
           </div>
           <div class="form-field">
-            <label for="customerAddress" id="labelAddress">כתובת (עיר, רחוב, מספר)</label>
+            <label for="customerAddress" id="labelAddress">כתובת (עיר، רחוב، מספר)</label>
             <input id="customerAddress" type="text" />
           </div>
           <div class="form-field">
@@ -541,7 +543,7 @@
         <div>
           <h2 id="contactTitle">צור קשר</h2>
           <small id="contactSubtitle">
-            נשמח לעזור בסגירת הזמנה, הצעת מחיר ושאלות טכניות.
+            נשמח לעזור בסגירת הזמנה، הצעת מחיר ושאלות טכניות.
           </small>
         </div>
       </div>
@@ -597,61 +599,35 @@
   </aside>
 
   <script>
-    // ========= CONFIG =========
-     const ORDER_RECEIVER_EMAIL = "aluminumzemer408@gmail.com"; // ضع هنا ايميلك
+    // لا يوجد إرسال إيميل الآن - بس تجهيز الطلب ومعاينة للطباعة.
+    // لاحقاً منربط API للسيرفر / خدمة إيميلات.
 
-    // ========= DATA =========
     const products = [
-      {
-        id: "2084",
-        name: "פלח 40/8",
-        klilNumber: "2084",
-        category: "פלחים",
-        imageHint: "שרטוט 40/8"
-      },
-      {
-        id: "2034",
-        name: "פלח 40/10",
-        klilNumber: "2034",
-        category: "פלחים",
-        imageHint: "שרטוט 40/10"
-      },
-      {
-        id: "0295",
-        name: "ריבוע 40/40/3",
-        klilNumber: "0295",
-        category: "ריבועים",
-        imageHint: "שרטוט ריבוע 40/40"
-      },
-      {
-        id: "0101",
-        name: "זוית 20/20/2",
-        klilNumber: "0101",
-        category: "זויות",
-        imageHint: "שרטוט זוית 20/20"
-      }
-      // لاحقاً بتقدر تزيد كل المنتجات اللي بدك ياها بنفس الشكل
+      { id: "2084", name: "פלח 40/8",   klilNumber: "2084", category: "פלחים" },
+      { id: "2034", name: "פלח 40/10",  klilNumber: "2034", category: "פלחים" },
+      { id: "0295", name: "ריבוע 40/40/3", klilNumber: "0295", category: "ריבועים" },
+      { id: "0101", name: "זוית 20/20/2",  klilNumber: "0101", category: "זויות" }
+      // تضيف باقي المنتجات بعدين بنفس الشكل
     ];
 
     const colors = {
       he: [
         { value: "שחור", label: "שחור" },
-        { value: "לבן", label: "לבן" },
-        { value: "משי", label: "משי" },
-        { value: "קרם", label: "קרם" }
+        { value: "לבן",  label: "לבן" },
+        { value: "משי",  label: "משי" },
+        { value: "קרם",  label: "קרם" }
       ],
       ar: [
         { value: "שחור", label: "أسود" },
-        { value: "לבן", label: "أبيض" },
-        { value: "משי", label: "ميشي" }, // حسب طلبك
-        { value: "קרם", label: "كريم" }
+        { value: "לבן",  label: "أبيض" },
+        { value: "משי",  label: "ميشي" },
+        { value: "קרם",  label: "كريم" }
       ]
     };
 
     let currentLang = "he";
     let cart = [];
 
-    // ========= TRANSLATIONS =========
     const t = {
       he: {
         brandTitle: "אלומיניום זמר",
@@ -698,9 +674,8 @@
         validationName: "אנא הכנס שם מלא.",
         validationPhone: "אנא הכנס טלפון.",
         validationAddress: "אנא הכנס כתובת.",
-        orderSuccessTitle: "ההזמנה הוכנה",
         orderSuccessBody:
-          "ההזמנה הוכנה. נפתח אצלך חלון אימייל עם ההזמנה (אם נתמך). בנוסף, הטקסט מופיע בתצוגה להדפסה.",
+          "ההזמנה הוכנה. אפשר להדפיס או להעתיק את النص ולשלוח אותו.",
         orderSubject: (orderId) => `הזמנה חדשה #${orderId} מאלומיניום זמר`
       },
       ar: {
@@ -748,14 +723,12 @@
         validationName: "اكتب اسمك الكامل.",
         validationPhone: "اكتب رقم هاتفك.",
         validationAddress: "اكتب عنوانك.",
-        orderSuccessTitle: "تم تجهيز الطلب",
         orderSuccessBody:
-          "تم تجهيز الطلب. رح يفتح عندك تطبيق الإيميل مع الطلب (إذا مدعوم). كمان النص ظاهر في معاينة الطباعة.",
+          "تم تجهيز الطلب. تقدر تطبعه أو تنسخه وتبعتها على واتساب / إيميل.",
         orderSubject: (orderId) => `طلب جديد #${orderId} من ألمنيوم زمر`
       }
     };
 
-    // ========= DOM HELPERS =========
     const $ = (id) => document.getElementById(id);
 
     const els = {
@@ -777,7 +750,6 @@
       closeCartBtn: $("closeCartBtn"),
       cartTitle: $("cartTitle"),
       cartBody: $("cartBody"),
-      cartEmptyText: $("cartEmptyText"),
       cartItemsLabel: $("cartItemsLabel"),
       cartItemsCount: $("cartItemsCount"),
       cartNoteLabel: $("cartNoteLabel"),
@@ -808,11 +780,9 @@
       customerPhone: $("customerPhone"),
       customerAddress: $("customerAddress"),
       customerEmail: $("customerEmail"),
-      sendCopyCheckbox: $("sendCopyCheckbox"),
-      submitOrderButton: $("submitOrderBtn")
+      sendCopyCheckbox: $("sendCopyCheckbox")
     };
 
-    // ========= RENDER PRODUCTS =========
     function initCategoryFilter() {
       const categories = Array.from(new Set(products.map((p) => p.category)));
       els.categoryFilter.innerHTML = "";
@@ -924,7 +894,6 @@
       });
     }
 
-    // ========= CART LOGIC =========
     function addToCart(product, color, quantity) {
       const existing = cart.find(
         (item) => item.id === product.id && item.color === color
@@ -950,11 +919,16 @@
       els.cartItemsCount.textContent = total;
     }
 
+    function displayColorLabel(value) {
+      const list = colors[currentLang];
+      const found = list.find((c) => c.value === value);
+      return found ? found.label : value;
+    }
+
     function renderCart() {
       els.cartBody.innerHTML = "";
       if (cart.length === 0) {
         const div = document.createElement("div");
-        div.id = "cartEmptyText";
         div.style.fontSize = "0.8rem";
         div.style.color = "#9ca3af";
         div.textContent = t[currentLang].cartEmptyText;
@@ -1015,21 +989,13 @@
       updateOrderPreview();
     }
 
-    function displayColorLabel(value) {
-      const list = colors[currentLang];
-      const found = list.find((c) => c.value === value);
-      return found ? found.label : value;
-    }
-
     function openCart() {
       els.cartPanel.classList.add("open");
     }
-
     function closeCart() {
       els.cartPanel.classList.remove("open");
     }
 
-    // ========= ORDER PREVIEW & EMAIL BODY =========
     function generateOrderId() {
       const now = new Date();
       const y = now.getFullYear();
@@ -1092,9 +1058,7 @@
         );
       });
       lines.push("");
-      lines.push(
-        "إجمالي القطع: " + cart.reduce((s, i) => s + i.quantity, 0)
-      );
+      lines.push("إجمالي القطع: " + cart.reduce((s, i) => s + i.quantity, 0));
       lines.push("");
       if (notes) {
         lines.push("ملاحظات على الطلب:");
@@ -1113,7 +1077,7 @@
       const email = els.customerEmail.value.trim();
       const notes = els.cartNotes.value.trim();
 
-      if (!hasCart && !name && !phone && !address) {
+      if (!hasCart && !name && !phone && !address && !email && !notes) {
         els.orderPreview.textContent = "";
         const span = document.createElement("span");
         span.style.color = "#6b7280";
@@ -1158,97 +1122,13 @@
       const heb = buildOrderBodyHebrew(orderId, customer, notes);
       const ar = buildOrderBodyArabic(orderId, customer, notes);
 
-      // نعرض في المعاينة (للـطباعة)
       els.orderPreview.textContent =
         heb + "\n\n---------------------\n\n" + ar;
 
-      // Fallback: mailto – لحد ما تربط خدمة إرسال إيميل من السيرفر
-   async function handleSubmitOrder() {
-  if (cart.length === 0) {
-    alert(t[currentLang].validationCartEmpty);
-    return;
-  }
-
-  const customer = {
-    name: els.customerName.value.trim(),
-    phone: els.customerPhone.value.trim(),
-    address: els.customerAddress.value.trim(),
-    email: els.customerEmail.value.trim()
-  };
-
-  if (!customer.name) {
-    alert(t[currentLang].validationName);
-    return;
-  }
-  if (!customer.phone) {
-    alert(t[currentLang].validationPhone);
-    return;
-  }
-  if (!customer.address) {
-    alert(t[currentLang].validationAddress);
-    return;
-  }
-
-  const notes = els.cartNotes.value.trim();
-  const orderId = generateOrderId();
-  const heb = buildOrderBodyHebrew(orderId, customer, notes);
-  const ar = buildOrderBodyArabic(orderId, customer, notes);
-
-  // نعرض في المعاينة (للطباعة)
-  els.orderPreview.textContent =
-    heb + "\n\n---------------------\n\n" + ar;
-
-  // نغيّر نص الزر مؤقتاً
-  els.submitOrderButton.disabled = true;
-  els.submitOrderText.textContent =
-    currentLang === "he" ? "שולח..." : "جاري الإرسال...";
-
-  try {
-    const res = await fetch("/api/send-order", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        orderId,
-        language: currentLang,
-        customer,
-        notes,
-        hebBody: heb,
-        arBody: ar,
-        totalItems: cart.reduce((s, i) => s + i.quantity, 0),
-        cart
-      })
-    });
-
-    if (!res.ok) {
-      throw new Error("Failed to send");
+      // حاليا: مفيش إرسال إيميل – بس تجهيز الطلب ومعاينة
+      alert(t[currentLang].orderSuccessBody);
     }
 
-    alert(t[currentLang].orderSuccessBody);
-    // لو حاب تفضّي السلة بعد الإرسال، فك التعليق:
-    // cart = [];
-    // renderCart();
-  } catch (err) {
-    console.error(err);
-    alert(
-      currentLang === "he"
-        ? "אירעה שגיאה בשליחת ההזמנה. נסה שוב מאוחר יותר."
-        : "صار خطأ أثناء إرسال الطلب. جرب مرة ثانية لاحقاً."
-    );
-  } finally {
-    els.submitOrderButton.disabled = false;
-    els.submitOrderText.textContent = t[currentLang].submitOrderText;
-  }
-}
-els.submitOrderButton.addEventListener("click", handleSubmitOrder);
-
-
-      // هون *مش* منفضي السلة تلقائياً عشان تقدر تطبع أو تعدل
-      // إذا بدك نفرغها بعد الإرسال، شيل التعليق عن السطور الجاية:
-      // cart = [];
-      // renderCart();
-    }
-
-    // ========= LANGUAGE =========
     function applyTranslations() {
       const dict = t[currentLang];
       els.brandTitle.textContent = dict.brandTitle;
@@ -1287,7 +1167,6 @@ els.submitOrderButton.addEventListener("click", handleSubmitOrder);
       renderCart();
     }
 
-    // ========= INIT =========
     document.addEventListener("DOMContentLoaded", () => {
       initCategoryFilter();
       renderProducts();
@@ -1314,7 +1193,7 @@ els.submitOrderButton.addEventListener("click", handleSubmitOrder);
         }
       );
 
-      els.submitOrderButton.addEventListener("click", handleSubmitOrder);
+      els.submitOrderBtn.addEventListener("click", handleSubmitOrder);
 
       applyTranslations();
     });
