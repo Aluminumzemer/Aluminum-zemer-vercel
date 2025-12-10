@@ -1585,7 +1585,7 @@
             item.category
           } | اللون: ${displayColorLabel(item.color)} | الكمية: ${item.quantity}`
         );
-      });
+      }
       lines.push("");
       lines.push("إجمالي القطع: " + cart.reduce((s, i) => s + i.quantity, 0));
       lines.push("");
