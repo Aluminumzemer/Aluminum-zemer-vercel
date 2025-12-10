@@ -1164,14 +1164,84 @@
         heb + "\n\n---------------------\n\n" + ar;
 
       // Fallback: mailto – لحد ما تربط خدمة إرسال إيميل من السيرفر
-      if (MAILTO_FALLBACK && ORDER_RECEIVER_EMAIL) {
-        const subject = encodeURIComponent(t[currentLang].orderSubject(orderId));
-        const body = encodeURIComponent(heb + "\n\n---------------------\n\n" + ar);
-        const mailtoUrl = `mailto:${ORDER_RECEIVER_EMAIL}?subject=${subject}&body=${body}`;
-        window.location.href = mailtoUrl;
-      }
+   async function handleSubmitOrder() {
+  if (cart.length === 0) {
+    alert(t[currentLang].validationCartEmpty);
+    return;
+  }
 
-      alert(t[currentLang].orderSuccessBody);
+  const customer = {
+    name: els.customerName.value.trim(),
+    phone: els.customerPhone.value.trim(),
+    address: els.customerAddress.value.trim(),
+    email: els.customerEmail.value.trim()
+  };
+
+  if (!customer.name) {
+    alert(t[currentLang].validationName);
+    return;
+  }
+  if (!customer.phone) {
+    alert(t[currentLang].validationPhone);
+    return;
+  }
+  if (!customer.address) {
+    alert(t[currentLang].validationAddress);
+    return;
+  }
+
+  const notes = els.cartNotes.value.trim();
+  const orderId = generateOrderId();
+  const heb = buildOrderBodyHebrew(orderId, customer, notes);
+  const ar = buildOrderBodyArabic(orderId, customer, notes);
+
+  // نعرض في المعاينة (للطباعة)
+  els.orderPreview.textContent =
+    heb + "\n\n---------------------\n\n" + ar;
+
+  // نغيّر نص الزر مؤقتاً
+  els.submitOrderButton.disabled = true;
+  els.submitOrderText.textContent =
+    currentLang === "he" ? "שולח..." : "جاري الإرسال...";
+
+  try {
+    const res = await fetch("/api/send-order", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        orderId,
+        language: currentLang,
+        customer,
+        notes,
+        hebBody: heb,
+        arBody: ar,
+        totalItems: cart.reduce((s, i) => s + i.quantity, 0),
+        cart
+      })
+    });
+
+    if (!res.ok) {
+      throw new Error("Failed to send");
+    }
+
+    alert(t[currentLang].orderSuccessBody);
+    // لو حاب تفضّي السلة بعد الإرسال، فك التعليق:
+    // cart = [];
+    // renderCart();
+  } catch (err) {
+    console.error(err);
+    alert(
+      currentLang === "he"
+        ? "אירעה שגיאה בשליחת ההזמנה. נסה שוב מאוחר יותר."
+        : "صار خطأ أثناء إرسال الطلب. جرب مرة ثانية لاحقاً."
+    );
+  } finally {
+    els.submitOrderButton.disabled = false;
+    els.submitOrderText.textContent = t[currentLang].submitOrderText;
+  }
+}
+els.submitOrderButton.addEventListener("click", handleSubmitOrder);
+
 
       // هون *مش* منفضي السلة تلقائياً عشان تقدر تطبع أو تعدل
       // إذا بدك نفرغها بعد الإرسال، شيل التعليق عن السطور الجاية:
