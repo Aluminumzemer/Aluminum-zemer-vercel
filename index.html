@@ -416,6 +416,14 @@
       color: #374151;
     }
   </style>
+
+  <!-- EmailJS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>
+    (function() {
+      emailjs.init("BksoAcl-qfhPV2rmc");
+    })();
+  </script>
 </head>
 <body>
   <header>
@@ -599,7 +607,7 @@
   </aside>
 
   <script>
-    // Products data
+    // Products data (no weight)
     const products = [
       { id: "2084", name: "פלח 40/8",      klilNumber: "2084", category: "פלחים" },
       { id: "2034", name: "פלח 40/10",     klilNumber: "2034", category: "פלחים" },
@@ -1128,31 +1136,34 @@
       // Update preview with the final text
       els.orderPreview.textContent = heb + "\n\n---------------------\n\n" + ar;
 
-      // Try sending to the Vercel serverless function
+      // Prepare EmailJS params
+      const templateParams = {
+        order_id: orderId,
+        subject: t[currentLang].orderSubject(orderId),
+        body_hebrew: heb,
+        body_arabic: ar,
+        customer_name: customer.name,
+        customer_phone: customer.phone,
+        customer_address: customer.address,
+        customer_email: customer.email || "",
+        send_copy: els.sendCopyCheckbox.checked ? "yes" : "no",
+        language: currentLang,
+        notes: notes
+      };
+
       try {
         els.submitOrderBtn.disabled = true;
         els.submitOrderBtn.style.opacity = "0.7";
 
-        const res = await fetch("/api/send-order", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            orderId,
-            subject: t[currentLang].orderSubject(orderId),
-            bodyHebrew: heb,
-            bodyArabic: ar,
-            customerEmail: customer.email || null,
-            sendCopy: !!els.sendCopyCheckbox.checked
-          })
-        });
-
-        if (!res.ok) {
-          throw new Error("Request failed");
-        }
+        await emailjs.send(
+          "service_f9s0wca",
+          "template_kifzvh5",
+          templateParams
+        );
 
         alert(t[currentLang].orderSuccessBody);
       } catch (err) {
-        console.error(err);
+        console.error("EmailJS error:", err);
         alert(t[currentLang].orderErrorBody);
       } finally {
         els.submitOrderBtn.disabled = false;
