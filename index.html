@@ -455,7 +455,7 @@
         <div>
           <h2 id="productsTitle">מוצרים</h2>
           <small id="productsSubtitle">
-            חיפוש לפי שם، מספר קליל או קטגוריה. ניתן להוסיף צבע וכמות لكل פרופיל.
+            חיפוש לפי שם، מספר קליל או קטגוריה. ניתן להוסיף צבע וכמות לכל פרופיל.
           </small>
         </div>
         <div>
@@ -472,7 +472,7 @@
           placeholder="חיפוש לפי שם، מספר קליל או קטגוריה..."
         />
         <select id="categoryFilter">
-          <option value="all">كل الفئات / כל הקטגוריות</option>
+          <option value="all">כל הקטגוריות / كل الفئات</option>
         </select>
       </div>
 
@@ -599,15 +599,13 @@
   </aside>
 
   <script>
-    // لا يوجد إرسال إيميل الآن - بس تجهيز الطلب ومعاينة للطباعة.
-    // لاحقاً منربط API للسيرفر / خدمة إيميلات.
-
+    // Products data
     const products = [
-      { id: "2084", name: "פלח 40/8",   klilNumber: "2084", category: "פלחים" },
-      { id: "2034", name: "פלח 40/10",  klilNumber: "2034", category: "פלחים" },
+      { id: "2084", name: "פלח 40/8",      klilNumber: "2084", category: "פלחים" },
+      { id: "2034", name: "פלח 40/10",     klilNumber: "2034", category: "פלחים" },
       { id: "0295", name: "ריבוע 40/40/3", klilNumber: "0295", category: "ריבועים" },
       { id: "0101", name: "זוית 20/20/2",  klilNumber: "0101", category: "זויות" }
-      // تضيف باقي المنتجات بعدين بنفس الشكل
+      // תוסיף פה עוד מוצרים באותו פורמט
     ];
 
     const colors = {
@@ -675,7 +673,9 @@
         validationPhone: "אנא הכנס טלפון.",
         validationAddress: "אנא הכנס כתובת.",
         orderSuccessBody:
-          "ההזמנה הוכנה. אפשר להדפיס או להעתיק את النص ולשלוח אותו.",
+          "ההזמנה הוכנה ונשלחה. אפשר גם להדפיס או להעתיק את הטקסט מהתצוגה המקדימה.",
+        orderErrorBody:
+          "הייתה בעיה בשליחת ההזמנה. אפשר להעתיק את הטקסט ולשלוח ידנית בינתיים.",
         orderSubject: (orderId) => `הזמנה חדשה #${orderId} מאלומיניום זמר`
       },
       ar: {
@@ -724,7 +724,9 @@
         validationPhone: "اكتب رقم هاتفك.",
         validationAddress: "اكتب عنوانك.",
         orderSuccessBody:
-          "تم تجهيز الطلب. تقدر تطبعه أو تنسخه وتبعتها على واتساب / إيميل.",
+          "تم تجهيز وإرسال الطلب. تقدر كمان تطبعه أو تنسخه من المعاينة.",
+        orderErrorBody:
+          "صار في مشكلة بإرسال الطلب. فيك تنسخ النص وتبعتو يدوي حالياً.",
         orderSubject: (orderId) => `طلب جديد #${orderId} من ألمنيوم زمر`
       }
     };
@@ -1094,7 +1096,7 @@
       els.orderPreview.textContent = heb + "\n\n---------------------\n\n" + ar;
     }
 
-    function handleSubmitOrder() {
+    async function handleSubmitOrder() {
       if (cart.length === 0) {
         alert(t[currentLang].validationCartEmpty);
         return;
@@ -1117,16 +1119,45 @@
         alert(t[currentLang].validationAddress);
         return;
       }
+
       const notes = els.cartNotes.value.trim();
       const orderId = generateOrderId();
       const heb = buildOrderBodyHebrew(orderId, customer, notes);
       const ar = buildOrderBodyArabic(orderId, customer, notes);
 
-      els.orderPreview.textContent =
-        heb + "\n\n---------------------\n\n" + ar;
+      // Update preview with the final text
+      els.orderPreview.textContent = heb + "\n\n---------------------\n\n" + ar;
 
-      // حاليا: مفيش إرسال إيميل – بس تجهيز الطلب ومعاينة
-      alert(t[currentLang].orderSuccessBody);
+      // Try sending to the Vercel serverless function
+      try {
+        els.submitOrderBtn.disabled = true;
+        els.submitOrderBtn.style.opacity = "0.7";
+
+        const res = await fetch("/api/send-order", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            orderId,
+            subject: t[currentLang].orderSubject(orderId),
+            bodyHebrew: heb,
+            bodyArabic: ar,
+            customerEmail: customer.email || null,
+            sendCopy: !!els.sendCopyCheckbox.checked
+          })
+        });
+
+        if (!res.ok) {
+          throw new Error("Request failed");
+        }
+
+        alert(t[currentLang].orderSuccessBody);
+      } catch (err) {
+        console.error(err);
+        alert(t[currentLang].orderErrorBody);
+      } finally {
+        els.submitOrderBtn.disabled = false;
+        els.submitOrderBtn.style.opacity = "";
+      }
     }
 
     function applyTranslations() {
@@ -1193,7 +1224,10 @@
         }
       );
 
-      els.submitOrderBtn.addEventListener("click", handleSubmitOrder);
+      els.submitOrderBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        handleSubmitOrder();
+      });
 
       applyTranslations();
     });
